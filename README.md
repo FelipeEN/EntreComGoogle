@@ -34,3 +34,15 @@ projeto-react-operacao-v2/
    ```bash
    npm run dev
    ```
+
+## Login com Google
+
+1. Crie um cliente OAuth do tipo **Aplicativo da Web** no Google Cloud Console.
+2. Em **Origens JavaScript autorizadas**, adicione `http://localhost:5173` e os domínios de produção usados pelo projeto.
+3. Crie um arquivo `.env.local` na raiz do projeto com o Client ID:
+   ```env
+   VITE_GOOGLE_CLIENT_ID=seu_client_id.apps.googleusercontent.com
+   ```
+   O arquivo `.env.example` contém o formato esperado. Reinicie o Vite depois de alterar variáveis de ambiente.
+
+Após o login, o perfil exibe os dados recebidos do endpoint de informações do Google. Esta implementação mantém os dados apenas no estado do React; ela não cria uma sessão de servidor nem deve ser usada, sozinha, para proteger recursos privados.

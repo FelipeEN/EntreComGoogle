@@ -7,6 +7,7 @@ import ProfileView from './components/ProfileView';
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
+  const [user, setUser] = useState(null);
 
   const submitButtonRef = useRef(null);
   const logoutButtonRef = useRef(null);
@@ -22,6 +23,35 @@ export default function App() {
       prevAuthRef.current = isAuthenticated;
     }
   }, [isAuthenticated]);
+
+  const handleGoogleSuccess = (googleUser) => {
+    if (!googleUser || !googleUser.email) {
+      return;
+    }
+
+    setUser({
+      name: googleUser.name || googleUser.email.split('@')[0],
+      email: googleUser.email,
+      picture: googleUser.picture,
+      provider: 'google',
+    });
+    setIsAuthenticated(true);
+  };
+
+  const handleDemoLogin = () => {
+    setUser({
+      name: 'Marina Lima',
+      email: email.trim() || 'marina@exemplo.com',
+      picture: '',
+      provider: 'demo',
+    });
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+  };
 
   return (
     <div className="app-shell">
@@ -39,13 +69,15 @@ export default function App() {
               <LoginView
                 email={email}
                 onEmailChange={setEmail}
-                onLoginSuccess={() => setIsAuthenticated(true)}
+                googleClientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+                onGoogleSuccess={handleGoogleSuccess}
+                onDemoLogin={handleDemoLogin}
                 submitButtonRef={submitButtonRef}
               />
             ) : (
               <ProfileView
-                email={email}
-                onLogout={() => setIsAuthenticated(false)}
+                user={user}
+                onLogout={handleLogout}
                 logoutButtonRef={logoutButtonRef}
               />
             )}

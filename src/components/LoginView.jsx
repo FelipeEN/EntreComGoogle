@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
+import { GoogleLogin } from 'google-login-react';
 
 export default function LoginView({
   email,
   onEmailChange,
-  onLoginSuccess,
+  googleClientId,
+  onGoogleSuccess,
+  onDemoLogin,
   submitButtonRef,
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [showGoogleError, setShowGoogleError] = useState(false);
+  const [googleError, setGoogleError] = useState('');
 
   const handleSubmit = (event) => {
     event.preventDefault();
     if (isLoading) return;
 
-    setShowGoogleError(false);
     setIsLoading(true);
 
     setTimeout(() => {
       setIsLoading(false);
-      onLoginSuccess();
+      onDemoLogin();
     }, 650);
   };
 
@@ -107,36 +109,69 @@ export default function LoginView({
           Confirmar alistamento
         </button>
 
-        <div className="relative text-center my-6">
-          <span
-            className="absolute left-0 right-0 top-1/2 border-t border-[#626954]"
-            aria-hidden="true"
-          />
-          <span
-            className="relative px-4 bg-[#252b24]"
-            style={{
-              color: 'rgb(167, 170, 150)',
-              fontWeight: 400,
-              fontSize: '14px',
-            }}
-          >
-            ou
-          </span>
-        </div>
+      </form>
 
-        <button
-          type="button"
-          onClick={() => setShowGoogleError(true)}
-          className="tactical-btn w-full px-5 py-4 font-semibold border border-[#777d64]"
+      <div className="relative text-center my-6">
+        <span
+          className="absolute left-0 right-0 top-1/2 border-t border-[#626954]"
+          aria-hidden="true"
+        />
+        <span
+          className="relative px-4 bg-[#252b24]"
           style={{
-            background: 'rgb(50, 57, 45)',
-            color: 'rgb(227, 220, 199)',
-            fontSize: '16px',
+            color: 'rgb(167, 170, 150)',
+            fontWeight: 400,
+            fontSize: '14px',
           }}
         >
-          Entrar na operação demonstração
-        </button>
-      </form>
+          ou
+        </span>
+      </div>
+
+      {googleClientId ? (
+        <GoogleLogin
+          clientId={googleClientId}
+          onSuccess={(googleUser) => {
+            if (!googleUser?.email) {
+              setGoogleError('O Google não retornou um e-mail para esta conta.');
+              return;
+            }
+
+            setGoogleError('');
+            onGoogleSuccess(googleUser);
+          }}
+          onError={() => {
+            setGoogleError('Não foi possível entrar com o Google. Tente novamente.');
+          }}
+          render={({ onClick }) => (
+            <button
+              type="button"
+              onClick={onClick}
+              className="tactical-btn w-full px-5 py-4 font-semibold border border-[#777d64]"
+              style={{
+                background: 'rgb(50, 57, 45)',
+                color: 'rgb(227, 220, 199)',
+                fontSize: '16px',
+              }}
+            >
+              Continuar com o Google
+            </button>
+          )}
+        />
+      ) : (
+        <p
+          className="p-3"
+          role="alert"
+          style={{
+            background: 'rgb(72, 56, 41)',
+            color: 'rgb(244, 202, 145)',
+            fontWeight: 400,
+            fontSize: '14px',
+          }}
+        >
+          Configure VITE_GOOGLE_CLIENT_ID para habilitar o login com Google.
+        </p>
+      )}
 
       {isLoading && (
         <p
@@ -152,10 +187,10 @@ export default function LoginView({
         </p>
       )}
 
-      {showGoogleError && (
+      {googleError && (
         <p
           className="mt-5 p-3"
-          role="status"
+          role="alert"
           style={{
             background: 'rgb(72, 56, 41)',
             color: 'rgb(244, 202, 145)',
@@ -163,7 +198,7 @@ export default function LoginView({
             fontSize: '14px',
           }}
         >
-          O canal de entrada da operação não está disponível nesta demonstração.
+          {googleError}
         </p>
       )}
 
@@ -175,7 +210,8 @@ export default function LoginView({
           fontSize: '13px',
         }}
       >
-        Operação fictícia: nenhum dado real é solicitado ou verificado.
+      O acesso de demonstração é fictício. No login Google, seu perfil só é
+      exibido após a autorização da sua conta.
       </p>
     </div>
   );
